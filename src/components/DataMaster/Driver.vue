@@ -17,6 +17,14 @@
                 <template v-slot:[`item.actions`]="{ item }">
                     <v-icon dense color="green" @click="editHandler(item)">mdi-pencil</v-icon>
                     <v-icon dense color="red" @click="deleteHandler(item.id_driver)">mdi-delete</v-icon>
+                    <v-icon dense color="primary" dark @click="showImageHandler(item)">mdi-file-multiple</v-icon>
+                </template>
+                <template v-slot:[`item.bintang_driver`]="{ item }">
+                    <v-rating v-model="item.rating_driver" background-color="orange lighten-3" color="orange" label="Rating Driver" medium readonly></v-rating>
+                </template>
+                <template v-slot:[`item.status_driver`]="{ item }">
+                    <v-chip v-if="item.status_driver === 'Tidak Tersedia'" color="red" outlined>{{ item.status_driver }}</v-chip>
+                    <v-chip v-if="item.status_driver === 'Tersedia'" color="green" outlined>{{ item.status_driver }}</v-chip>
                 </template>
             </v-data-table>
         </v-card>
@@ -37,6 +45,10 @@
                         <v-text-field v-model="form.notelp_driver" label="Nomor Telepon Driver" required></v-text-field>
                         <v-text-field v-model="form.email_driver" label="Email Driver" required></v-text-field>
                         <v-text-field v-model="form.sewa_harian_driver" label="Sewa Harian Driver" required></v-text-field>
+                        <v-file-input append-icon="mdi-camera" accept="image/*" label="Foto SIM Driver" id="simDriver" ref="fileSimDriver"></v-file-input>
+                        <v-file-input append-icon="mdi-camera" accept="image/*" label="Surat Bebas Napza" id="napzaDriver" ref="fileNapzaDriver"></v-file-input>
+                        <v-file-input append-icon="mdi-camera" accept="image/*" label="Surat Kesehatan Jiwa dan Jasmani" id="jasmaniDriver" ref="fileJasmaniDriver"></v-file-input>
+                        <v-file-input append-icon="mdi-camera" accept="image/*" label="Surat Keterangan Catatan Kriminal (SKCK)" id="skckDriver" ref="fileSkckDriver"></v-file-input>
                         <v-select v-model="form.status_driver" label="Status Driver" :items="status" required></v-select>
                     </v-container>
                     <v-container v-else>
@@ -49,8 +61,13 @@
                         <v-text-field v-model="form.notelp_driver" label="Nomor Telepon Driver" required></v-text-field>
                         <v-text-field v-model="form.email_driver" label="Email Driver" required></v-text-field>
                         <v-text-field v-model="form.sewa_harian_driver" label="Sewa Harian Driver" required></v-text-field>
+                        <v-file-input append-icon="mdi-camera" accept="image/*" label="Foto SIM Driver" id="simDriver" ref="fileSimDriver"></v-file-input>
+                        <v-file-input append-icon="mdi-camera" accept="image/*" label="Surat Bebas Napza" id="napzaDriver" ref="fileNapzaDriver"></v-file-input>
+                        <v-file-input append-icon="mdi-camera" accept="image/*" label="Surat Kesehatan Jiwa dan Jasmani" id="jasmaniDriver" ref="fileJasmaniDriver"></v-file-input>
+                        <v-file-input append-icon="mdi-camera" accept="image/*" label="Surat Keterangan Catatan Kriminal (SKCK)" id="skckDriver" ref="fileSkckDriver"></v-file-input>
                         <v-select v-model="form.status_driver" label="Status Driver" :items="status" required></v-select>
-                        <v-text-field v-model="form.password_driver" label="Password Driver" required></v-text-field>
+                        <v-text-field v-model="form.password_driver" label="Password Driver" :type="show ? 'text' : 'password'" 
+                            :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'" @click:append="show = !show" required></v-text-field>
                     </v-container>
                 </v-card-text>
                 <v-card-actions>
@@ -75,6 +92,58 @@
             </v-card>
         </v-dialog>
 
+        <v-dialog v-model="dialogDokumen" persistent max-width="600px">
+            <v-card>
+                <v-card-title >
+                    <span class="headline">Dokumen Driver</span>
+                </v-card-title>
+                <span><b>Surat Izin Mengemudi</b></span>
+                <v-divider></v-divider>
+                <v-container fluid>
+                    <v-layout justify-center align-center>
+                        <v-flex shrink>
+                            <div><v-img width="350px" :src="previewImageUrlSim == '' ? $baseUrl+'/storage/'+form.sim_driver : previewImageUrlSim" id="simDriver" class="mb-5"></v-img></div>
+                        </v-flex>
+                    </v-layout>
+                </v-container>
+                
+                <span><b>Surat Bebas Napza</b></span>
+                <v-divider></v-divider>
+                <v-container fluid>
+                    <v-layout justify-center align-center>
+                        <v-flex shrink>
+                            <div><v-img width="350px" :src="previewImageUrlNapza == '' ? $baseUrl+'/storage/'+form.surat_bebas_napza : previewImageUrlNapza" id="napzaDriver" class="mb-5"></v-img></div>
+                        </v-flex>
+                    </v-layout>
+                </v-container>
+                
+                <span><b>Surat Kesehatan Jiwa dan Jasmani</b></span>
+                <v-divider></v-divider>
+                <v-container fluid>
+                    <v-layout justify-center align-center>
+                        <v-flex shrink>
+                            <div><v-img width="350px" :src="previewImageUrlJasmani == '' ? $baseUrl+'/storage/'+form.surat_jiwa_jasmani : previewImageUrlJasmani" id="jasmaniDriver" class="mb-5"></v-img></div>
+                        </v-flex>
+                    </v-layout>
+                </v-container>
+                
+                <span><b>Surat Keterangan Catatan Kriminal</b></span>
+                <v-divider></v-divider>
+                <v-container fluid>
+                    <v-layout justify-center align-center>
+                        <v-flex shrink>
+                            <div><v-img width="350px" :src="previewImageUrlSkck == '' ? $baseUrl+'/storage/'+form.skck_driver : previewImageUrlSkck" id="skckDriver" class="mb-5"></v-img></div>
+                        </v-flex>
+                    </v-layout>
+                </v-container>
+                
+                <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn color="blue darken-1" text @click="dialogDokumen = false">Close</v-btn>
+                    </v-card-actions>
+            </v-card>
+        </v-dialog>
+
         <v-snackbar v-model="snackbar" :color="color" timeout="2000" bottom>{{ error_message }}</v-snackbar>
     </v-main>
 </template>
@@ -93,6 +162,7 @@ export default {
             search: null,
             dialog: false,
             dialogConfirm: false,
+            dialogDokumen: false,
             headers: [
                 { text: "ID Driver", align: "start", sortable: true, value: "id_driver", },
                 { text: "Nama", value: "nama_driver" },
@@ -105,6 +175,7 @@ export default {
                 { text: "Sewa Harian", value: "sewa_harian_driver" },
                 { text: "Status", value: "status_driver" },
                 { text: "Rating", value: "rating_driver" },
+                { text: "Rating", value: "bintang_driver" },
                 { text: "Foto", value: "foto" },
                 { text: "Action", value: "actions" },
             ],
@@ -127,9 +198,20 @@ export default {
             editId: '',
             status: [ 'Tersedia', 'Tidak Tersedia' ],
             jeniskelamin: ['Laki-Laki', 'Perempuan' ],
+            previewImageUrlSim : '',
+            previewImageUrlNapza : '',
+            previewImageUrlJasmani : '',
+            previewImageUrlSkck : '',
         };
     },
     methods: {
+        onPreviewImage(e) {
+            this.previewImageUrlSim = URL.createObjectURL(e);
+            this.previewImageUrlNapza = URL.createObjectURL(e);
+            this.previewImageUrlJasmani = URL.createObjectURL(e);
+            this.previewImageUrlSkck = URL.createObjectURL(e);
+        },
+
         setForm(){
             if (this.inputType !== 'Tambah') {
                 this.update();
@@ -161,6 +243,18 @@ export default {
             this.driver.append('email_driver', this.form.email_driver);
             this.driver.append('sewa_harian_driver', this.form.sewa_harian_driver);
             this.driver.append('status_driver', this.form.status_driver);
+
+            var sim_driver = document.getElementById('simDriver'), dataSimDriver = sim_driver.files[0];
+            this.driver.append('sim_driver', dataSimDriver);
+
+            var napza_driver = document.getElementById('napzaDriver'), dataNapzaDriver = napza_driver.files[0];
+            this.driver.append('surat_bebas_napza', dataNapzaDriver);
+            
+            var jasmani_driver = document.getElementById('jasmaniDriver'), dataJasmaniDriver = jasmani_driver.files[0];
+            this.driver.append('surat_jiwa_jasmani', dataJasmaniDriver);
+
+            var skck_driver = document.getElementById('skckDriver'), dataSkckDriver = skck_driver.files[0];
+            this.driver.append('skck_driver', dataSkckDriver);
 
             var url = this.$api + '/driver';
             this.load = true;
@@ -209,6 +303,34 @@ export default {
             data.append('status_driver', this.form.status_driver);
             data.append('password_driver', this.form.password_driver ?? '');
 
+            var inputSimDriver = document.getElementById('simDriver'),
+            dataSimDriver = inputSimDriver.files[0];
+
+            if(dataSimDriver){
+                data.append('sim_driver', dataSimDriver);
+            }
+
+            var inputNapzaDriver = document.getElementById('napzaDriver'),
+            dataNapzaDriver = inputNapzaDriver.files[0];
+
+            if(dataNapzaDriver){
+                data.append('surat_bebas_napza', dataNapzaDriver);
+            }
+
+            var inputJasmaniDriver = document.getElementById('jasmaniDriver'),
+            dataJasmaniDriver = inputJasmaniDriver.files[0];
+
+            if(dataJasmaniDriver){
+                data.append('surat_jiwa_jasmani', dataJasmaniDriver);
+            }
+
+            var inputSkckDriver = document.getElementById('skckDriver'),
+            dataSkckDriver = inputSkckDriver.files[0];
+
+            if(dataSkckDriver){
+                data.append('skck_driver', dataSkckDriver);
+            }
+
             var url = this.$api + '/driver/' + this.editId;
             this.load = true;
             this.$http.post(url, data, {
@@ -224,8 +346,8 @@ export default {
             this.close();
             this.readData();
             this.resetForm();
-            location.reload();
             this.inputType = 'Tambah';
+            location.reload();
             })
             .catch((error) => {
             this.error_message = error.response.data.message;
@@ -276,7 +398,15 @@ export default {
             this.form.sewa_harian_driver = item.sewa_harian_driver;
             this.form.status_driver = item.status_driver;
             this.dialog = true;
-            },
+        },
+
+        showImageHandler(item){
+            this.form.sim_driver = item.sim_driver;
+            this.form.surat_bebas_napza = item.surat_bebas_napza;
+            this.form.surat_jiwa_jasmani = item.surat_jiwa_jasmani;
+            this.form.skck_driver = item.skck_driver;
+            this.dialogDokumen = true;
+        },
 
         deleteHandler(id){
             this.deleteId = id;
@@ -312,6 +442,11 @@ export default {
                 password_driver: '',
             };
             this.$refs.fileFotoDriver.reset();
+            this.$refs.fileSimDriver.reset();
+            this.$refs.fileNapzaDriver.reset();
+            this.$refs.fileJasmaniDriver.reset();
+            this.$refs.fileSkckDriver.reset();
+
         },
     },
     computed:{

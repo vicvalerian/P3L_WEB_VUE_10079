@@ -15,8 +15,8 @@
                     <v-img :src="$baseUrl+'/storage/'+item.foto_pegawai" height="50px" width="50px" style="object-fit:cover; border-radius:50%; padding: 25px 0;"/>
                 </template>
                 <template v-slot:[`item.actions`]="{ item }">
-                <v-icon dense color="green" @click="editHandler(item)">mdi-pencil</v-icon>
-                <v-icon dense color="red" @click="deleteHandler(item.id_pegawai)">mdi-delete</v-icon>
+                    <v-icon dense color="green" @click="editHandler(item)">mdi-pencil</v-icon>
+                    <v-icon dense color="red" @click="deleteHandler(item.id_pegawai)">mdi-delete</v-icon>
                 </template>
             </v-data-table>
         </v-card>

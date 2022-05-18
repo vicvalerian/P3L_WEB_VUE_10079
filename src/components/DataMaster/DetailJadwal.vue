@@ -12,8 +12,8 @@
 
             <v-data-table :headers="headers" :items="detailJadwals" :search="search">
                 <template v-slot:[`item.actions`]="{ item }">
-                <v-icon dense color="green" @click="editHandler(item)">mdi-pencil</v-icon>
-                <v-icon dense color="red" @click="deleteHandler(item.id_detail_jadwal)">mdi-delete</v-icon>
+                    <v-icon dense color="green" @click="editHandler(item)">mdi-pencil</v-icon>
+                    <v-icon dense color="red" @click="deleteHandler(item.id_detail_jadwal)">mdi-delete</v-icon>
                 </template>
             </v-data-table>
         </v-card>
@@ -142,7 +142,7 @@ export default {
 
         //Read Data Pegawai
         readDataPegawai() {
-            var url = this.$api + '/pegawai';
+            var url = this.$api + '/detailJadwalPegawai';
             this.$http.get(url).then((response) => {
                 this.pegawais = response.data.data;
             });

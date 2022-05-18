@@ -9,7 +9,7 @@
             <v-card v-if="loggedIn">
               <v-card-text class="pt-4">
                 <div>
-                  <v-form v-model="valid" ref="form">
+                  <v-form ref="form">
                     <v-text-field v-model="id_pelanggan" readonly filled label="Id Pelanggan"></v-text-field>
                     <v-text-field v-model="nama_pelanggan" required filled label="Nama"></v-text-field>
                     <v-text-field v-model="email_pelanggan" required filled label="Email"></v-text-field>
@@ -35,7 +35,7 @@
             <v-card v-if="loggedInPegawai">
               <v-card-text class="pt-4">
                 <div>
-                  <v-form v-model="valid" ref="form">
+                  <v-form ref="form">
                     <v-container fluid>
                       <v-layout justify-center align-center>
                         <v-flex shrink>
@@ -65,7 +65,7 @@
             </v-card>
 
             <h1 v-if="loggedIn" class="mt-8 custom1--text">Kartu Pelanggan</h1>
-            <v-card class="elevation-12" v-if="loggedIn">
+            <v-card class="elevation-12" v-if="loggedIn" id="cetakKartuPelanggan">
               <v-window>
                 <v-window-item>
                   <v-row class="fill-height fluid blue darken-4" align="center">
@@ -89,6 +89,15 @@
                 </v-window-item>
               </v-window>
             </v-card>
+
+            <v-layout v-if="loggedIn" justify-center>
+              <div class="d-flex">
+                <v-btn class="btn-generate mt-8" color="primary" @click="generateCard()">
+                  Cetak Kartu Pelanggan Anda
+                </v-btn>
+              </div>
+            </v-layout>
+            
 
           </v-col>
         </v-row>
@@ -125,6 +134,7 @@
 </style>
 
 <script>
+import html2canvas from "html2canvas";
 export default {
   name: "Profil",
   data(){
@@ -161,6 +171,18 @@ export default {
   methods: {
     onPreviewImage(e) {
       this.previewImageUrl = URL.createObjectURL(e)
+    },
+
+    async generateCard(){
+      console.log("Button Clicked");
+      const canvas = await html2canvas(document.getElementById("cetakKartuPelanggan"));
+      canvas.style.display = "none";
+      document.body.appendChild(canvas);
+      const image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+      const a = document.createElement("a");
+      a.setAttribute("download", `kartuPelanggan.png`);
+      a.setAttribute("href", image);
+      a.click();
     },
 
     updatePelanggan(){

@@ -12,7 +12,7 @@
                                             <v-card-text class="mt-12">
                                                 <h1 class="text-center display-2 blue--text text--accent-3 custom1--text">Login Atma Jogja Rental</h1>
                                                 <h3 class="text-center mt-4 custom2--text"><strong>Login untuk melanjutkan</strong></h3>
-                                                <v-form v-model="valid" ref="form">
+                                                <v-form ref="form">
                                                     <v-select v-model="akun" label="Akun" :items="pilihanAkun" color="blue" prepend-icon="mdi-account" required></v-select>
                                                     <v-text-field label="Email" v-model="email" required prepend-icon="mdi-email" color="blue"/>
                                                     <v-text-field v-model="password" label="Password" prepend-icon="mdi-lock" :type="show ? 'text' : 'password'" color="blue"
@@ -70,6 +70,7 @@ export default {
             color: '',
             email: '',
             password: '',
+            akun: '',
             pilihanAkun: [ 'Pelanggan', 'Pegawai', 'Driver' ],
         };
     },

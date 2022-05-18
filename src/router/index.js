@@ -49,6 +49,13 @@ const router = new VueRouter({
                   meta: { title: 'Pemilik' },
                   component: importComponent('DataMaster/Pemilik'),
               },
+              //Pemilik
+              {
+                path: '/kontrakMobil',
+                name: 'KontrakMobil',
+                meta: { title: 'Kontrak Mobil' },
+                component: importComponent('DataMaster/KontrakMobil'),
+            },
               //Driver
               {
                   path: '/driver',
@@ -88,7 +95,7 @@ const router = new VueRouter({
               {
                   path: '/detailJadwal',
                   name: 'DetailJadwal',
-                  meta: { title: 'DetailJadwal' },
+                  meta: { title: 'Detail Jadwal' },
                   component: importComponent('DataMaster/DetailJadwal'),
               },
               //Transaksi
@@ -102,8 +109,50 @@ const router = new VueRouter({
               {
                   path: '/detailTransaksi',
                   name: 'DetailTransaksi',
-                  meta: { title: 'DetailTransaksi' },
+                  meta: { title: 'Detail Transaksi' },
                   component: importComponent('DataMaster/DetailTransaksi'),
+              },
+              //Promo Pelanggan
+              {
+                path: '/promoPelanggan',
+                name: 'PromoPelanggan',
+                meta: { title: 'Daftar Promo' },
+                component: importComponent('DataMaster/PromoPelanggan'),
+              },
+              //Mobil Pelanggan
+              {
+                path: '/mobilPelanggan',
+                name: 'MobilPelanggan',
+                meta: { title: 'Brosur Mobil' },
+                component: importComponent('DataMaster/MobilPelanggan'),
+              },
+              //Driver Pelanggan
+              {
+                path: '/driverPelanggan',
+                name: 'DriverPelanggan',
+                meta: { title: 'Brosur Driver' },
+                component: importComponent('DataMaster/DriverPelanggan'),
+              },
+              //Driver Pelanggan
+              {
+                path: '/driverRiwayatTransaksi',
+                name: 'DriverRiwayatTransaksi',
+                meta: { title: 'Riwayat Transaksi Driver' },
+                component: importComponent('DataMaster/DriverRiwayatTransaksi'),
+              },
+              //Transaksi Pelanggan
+              {
+                path: '/transaksiPelanggan',
+                name: 'TransaksiPelanggan',
+                meta: { title: 'Transaksi Pelanggan' },
+                component: importComponent('DataMaster/TransaksiPelanggan'),
+              },
+              //Detail Transaksi Pelanggan
+              {
+                path: '/detailTransaksiPelanggan',
+                name: 'DetailTransaksiPelanggan',
+                meta: { title: 'Detail Transaksi Pelanggan' },
+                component: importComponent('DataMaster/DetailTransaksiPelanggan'),
               },
           ],
       },
@@ -162,11 +211,13 @@ router.beforeEach((to, from, next) => {
         document.to.meta.title = "Login"
     }
 
-    //Hanya Admin yang bisa melihat halaman pemilik, driver, pegawai, mobil
+    //Hanya Admin yang bisa melihat halaman pemilik, driver, pegawai, mobil, kontrakmobil
     if(to.name == "Pemilik" && localStorage.getItem("id_jabatan") != "2" && localStorage.getItem("email") != null ||
         to.name == "Driver" && localStorage.getItem("id_jabatan") != "2" && localStorage.getItem("email") != null ||
         to.name == "Pegawai" && localStorage.getItem("id_jabatan") != "2" && localStorage.getItem("email") != null ||
-        to.name == "Mobil" && localStorage.getItem("id_jabatan") != "2" && localStorage.getItem("email") != null){
+        to.name == "Mobil" && localStorage.getItem("id_jabatan") != "2" && localStorage.getItem("email") != null ||
+        to.name == "KontrakMobil" && localStorage.getItem("id_jabatan") != "2" && localStorage.getItem("email") != null ||
+        to.name == "DriverRiwayatTransaksi" && localStorage.getItem("id_jabatan") != "2" && localStorage.getItem("email") != null){
         next({ name: "Login" })
         document.to.meta.title = "Login"
     }
@@ -175,6 +226,16 @@ router.beforeEach((to, from, next) => {
     if(to.name == "Pelanggan" && localStorage.getItem("id_jabatan") != "3" && localStorage.getItem("email") != null ||
         to.name == "Transaksi" && localStorage.getItem("id_jabatan") != "3" && localStorage.getItem("email") != null ||
         to.name == "DetailTransaksi" && localStorage.getItem("id_jabatan") != "3" && localStorage.getItem("email") != null){
+        next({ name: "Login" })
+        document.to.meta.title = "Login"
+    }
+
+    //Hanya Pelanggan yang bisa melihat halaman transaksi pelanggan, detail transaksi pelanggan
+    if(to.name == "TransaksiPelanggan" && localStorage.getItem("id_jabatan") != null && localStorage.getItem("email") != null ||
+        to.name == "DetailTransaksiPelanggan" && localStorage.getItem("id_jabatan") != null && localStorage.getItem("email") != null ||
+        to.name == "MobilPelanggan" && localStorage.getItem("id_jabatan") != null && localStorage.getItem("email") != null ||
+        to.name == "PromoPelanggan" && localStorage.getItem("id_jabatan") != null && localStorage.getItem("email") != null ||
+        to.name == "DriverPelanggan" && localStorage.getItem("id_jabatan") != null && localStorage.getItem("email") != null){
         next({ name: "Login" })
         document.to.meta.title = "Login"
     }

@@ -11,9 +11,16 @@
             </v-card-title>
 
             <v-data-table :headers="headers" :items="mobils" :search="search">
+                <template v-slot:[`item.foto`]="{ item }">
+                    <v-img :src="$baseUrl+'/storage/'+item.foto_mobil" height="50px" width="50px" style="object-fit:cover; border-radius:50%; padding: 25px 0;"/>
+                </template>
                 <template v-slot:[`item.actions`]="{ item }">
-                <v-icon dense color="green" @click="editHandler(item)">mdi-pencil</v-icon>
-                <v-icon dense color="red" @click="deleteHandler(item.id_mobil)">mdi-delete</v-icon>
+                    <v-icon dense color="green" @click="editHandler(item)">mdi-pencil</v-icon>
+                    <v-icon dense color="red" @click="deleteHandler(item.id_mobil)">mdi-delete</v-icon>
+                </template>
+                <template v-slot:[`item.status_mobil`]="{ item }">
+                    <v-chip v-if="item.status_mobil === 'Tidak Tersedia'" color="red" outlined>{{ item.status_mobil }}</v-chip>
+                    <v-chip v-if="item.status_mobil === 'Tersedia'" color="green" outlined>{{ item.status_mobil }}</v-chip>
                 </template>
             </v-data-table>
         </v-card>
@@ -42,9 +49,11 @@
                         <v-text-field v-model="form.warna_mobil" label="Warna Mobil" required></v-text-field>
                         <v-text-field v-model="form.kapasitas_penumpang" label="Kapasitas Penumpang" required></v-text-field>
                         <v-text-field v-model="form.fasilitas_mobil" label="Fasilitas Mobil" required></v-text-field>
-                        <v-text-field v-model="form.no_stnk" label="No STNK" required></v-text-field>
+                        <v-text-field v-model="form.no_stnk" label="No STNK" counter="5" required></v-text-field>
                         <v-text-field v-model="form.sewa_harian_mobil" label="Sewa Harian Mobil" required></v-text-field>
                         <v-text-field v-model="form.volume_bagasi" label="Volume Bagasi" required></v-text-field>
+                        <v-select v-model="form.status_mobil" label="Status Mobil" :items="statusMobil" required></v-select>
+                        <v-file-input append-icon="mdi-camera" accept="image/*" label="Foto Mobil" id="fotoMobil" ref="fileFotoMobil"></v-file-input>
                     </v-container>
                     <v-container v-else>
                         <v-select :items="pemiliks" v-model="form.id_pemilik" label="Pemilik" item-value="id_pemilik" clearable required>
@@ -63,9 +72,11 @@
                         <v-text-field v-model="form.warna_mobil" label="Warna Mobil" required></v-text-field>
                         <v-text-field v-model="form.kapasitas_penumpang" label="Kapasitas Penumpang" required></v-text-field>
                         <v-text-field v-model="form.fasilitas_mobil" label="Fasilitas Mobil" required></v-text-field>
-                        <v-text-field v-model="form.no_stnk" label="No STNK" required></v-text-field>
+                        <v-text-field v-model="form.no_stnk" label="No STNK" counter="5" required></v-text-field>
                         <v-text-field v-model="form.sewa_harian_mobil" label="Sewa Harian Mobil" required></v-text-field>
                         <v-text-field v-model="form.volume_bagasi" label="Volume Bagasi" required></v-text-field>
+                        <v-select v-model="form.status_mobil" label="Status Mobil" :items="statusMobil" required></v-select>
+                        <v-file-input append-icon="mdi-camera" accept="image/*" label="Foto Mobil" id="fotoMobil" ref="fileFotoMobil"></v-file-input>
                     </v-container>
                 </v-card-text>
                 <v-card-actions>
@@ -123,6 +134,8 @@ export default {
                 { text: "Kategori Aset", value: "kategori_aset" },
                 { text: "Sewa Harian", value: "sewa_harian_mobil" },
                 { text: "Volume Bagasi", value: "volume_bagasi" },
+                { text: "Status Mobil", value: "status_mobil" },
+                { text: "Foto", value: "foto" },
                 { text: "Action", value: "actions" },
             ],
             mobil: new FormData(),
@@ -142,11 +155,13 @@ export default {
                 no_stnk: '',
                 sewa_harian_mobil: '',
                 volume_bagasi: '',
+                status_mobil: '',
             },
             deleteId: '',
             editId: '',
             transmisi: [ 'AT', 'CVT', 'Manual' ],
             bahanBakar: [ 'Pertalite', 'Pertamax', 'Dexlite' ],
+            statusMobil: [ 'Tersedia', 'Tidak Tersedia' ],
         };
     },
     methods: {
@@ -177,7 +192,6 @@ export default {
         //Insert Data Mobil
         save(){
             this.mobil.append('plat_mobil', this.form.plat_mobil);
-
             this.mobil.append('id_pemilik', this.form.id_pemilik ?? '');
             this.mobil.append('nama_mobil', this.form.nama_mobil);
             this.mobil.append('tipe_mobil', this.form.tipe_mobil);
@@ -190,6 +204,10 @@ export default {
             this.mobil.append('no_stnk', this.form.no_stnk);
             this.mobil.append('sewa_harian_mobil', this.form.sewa_harian_mobil);
             this.mobil.append('volume_bagasi', this.form.volume_bagasi);
+            this.mobil.append('status_mobil', this.form.status_mobil);
+
+            var foto_mobil = document.getElementById('fotoMobil'), dataFotoMobil = foto_mobil.files[0];
+            this.mobil.append('foto_mobil', dataFotoMobil);
 
             var url = this.$api + '/mobil';
             this.load = true;
@@ -207,6 +225,7 @@ export default {
             this.readDataMobil();
             this.readDataPemilik();
             this.resetForm();
+            location.reload();
             })
             .catch((error) => {
             this.error_message = error.response.data.message;
@@ -232,6 +251,14 @@ export default {
             data.append('no_stnk', this.form.no_stnk);
             data.append('sewa_harian_mobil', this.form.sewa_harian_mobil);
             data.append('volume_bagasi', this.form.volume_bagasi);
+            data.append('status_mobil', this.form.status_mobil);
+
+            var inputFotoMobil = document.getElementById('fotoMobil'),
+            dataFotoMobil = inputFotoMobil.files[0];
+
+            if(dataFotoMobil){
+                data.append('foto_mobil', dataFotoMobil);
+            }
 
             var url = this.$api + '/mobil/' + this.editId;
             this.load = true;
@@ -250,6 +277,7 @@ export default {
             this.readDataPemilik();
             this.resetForm();
             this.inputType = 'Tambah';
+            location.reload();
             })
             .catch((error) => {
             this.error_message = error.response.data.message;
@@ -302,6 +330,7 @@ export default {
             this.form.no_stnk = item.no_stnk;
             this.form.sewa_harian_mobil = item.sewa_harian_mobil;
             this.form.volume_bagasi = item.volume_bagasi;
+            this.form.status_mobil = item.status_mobil;
             this.dialog = true;
             },
 
@@ -329,20 +358,22 @@ export default {
 
         resetForm(){
             this.form ={
-                plat_mobil: null,
-                id_mobil: null,
-                nama_mobil: null,
-                tipe_mobil: null,
-                jenis_transmisi: null,
-                jenis_bahan_bakar: null,
-                volume_bahan_bakar: null,
-                warna_mobil: null,
-                kapasitas_penumpang: null,
-                fasilitas_mobil: null,
-                no_stnk: null,
-                sewa_harian_mobil: null,
-                volume_bagasi: null,
+                plat_mobil: '',
+                id_mobil: '',
+                nama_mobil: '',
+                tipe_mobil: '',
+                jenis_transmisi: '',
+                jenis_bahan_bakar: '',
+                volume_bahan_bakar: '',
+                warna_mobil: '',
+                kapasitas_penumpang: '',
+                fasilitas_mobil: '',
+                no_stnk: '',
+                sewa_harian_mobil: '',
+                volume_bagasi: '',
+                status_mobil: '',
             };
+            this.$refs.fileFotoMobil.reset();
         },
     },
     computed:{

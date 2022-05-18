@@ -12,8 +12,12 @@
 
             <v-data-table :headers="headers" :items="pelanggans" :search="search">
                 <template v-slot:[`item.actions`]="{ item }">
-                <v-icon dense color="green" @click="editHandler(item)">mdi-pencil</v-icon>
-                <v-icon dense color="red" @click="deleteHandler(item.id_pelanggan)">mdi-delete</v-icon>
+                    <v-icon dense color="green" @click="editHandler(item)">mdi-pencil</v-icon>
+                    <v-icon dense color="red" @click="deleteHandler(item.id_pelanggan)">mdi-delete</v-icon>
+                </template>
+                <template v-slot:[`item.status_pelanggan`]="{ item }">
+                    <v-chip v-if="item.status_pelanggan === 'Belum Verifikasi'" color="red" outlined>{{ item.status_pelanggan }}</v-chip>
+                    <v-chip v-if="item.status_pelanggan === 'Sudah Verifikasi'" color="green" outlined>{{ item.status_pelanggan }}</v-chip>
                 </template>
             </v-data-table>
         </v-card>
@@ -31,8 +35,8 @@
                         <v-select v-model="form.jenis_kelamin_pelanggan" label="Jenis Kelamin Pelanggan" :items="jeniskelamin" required></v-select>
                         <v-text-field v-model="form.email_pelanggan" label="Email Pelanggan" required></v-text-field>
                         <v-text-field v-model="form.notelp_pelanggan" label="Nomor Telepon Pelanggan" required></v-text-field>
-                        <v-text-field v-model="form.no_ktp_pelanggan" label="No KTP Pelanggan" required></v-text-field>
-                        <v-text-field v-model="form.no_sim_pelanggan" label="No SIM Pelanggan" required type="number"></v-text-field>
+                        <v-text-field v-model="form.no_ktp_pelanggan" label="No KTP Pelanggan" counter="16" required></v-text-field>
+                        <v-text-field v-model="form.no_sim_pelanggan" label="No SIM Pelanggan" counter="13"></v-text-field>
                     </v-container>
                     <v-container v-else>
                         <v-text-field v-model="form.nama_pelanggan" label="Nama Pelanggan" required></v-text-field>
@@ -41,8 +45,8 @@
                         <v-select v-model="form.jenis_kelamin_pelanggan" label="Jenis Kelamin Pelanggan" :items="jeniskelamin" required></v-select>
                         <v-text-field v-model="form.email_pelanggan" label="Email Pelanggan" required></v-text-field>
                         <v-text-field v-model="form.notelp_pelanggan" label="Nomor Telepon Pelanggan" required></v-text-field>
-                        <v-text-field v-model="form.no_ktp_pelanggan" label="No KTP Pelanggan" required></v-text-field>
-                        <v-text-field v-model="form.no_sim_pelanggan" label="No SIM Pelanggan" type="number"></v-text-field>
+                        <v-text-field v-model="form.no_ktp_pelanggan" label="No KTP Pelanggan" counter="16" required></v-text-field>
+                        <v-text-field v-model="form.no_sim_pelanggan" label="No SIM Pelanggan" counter="13"></v-text-field>
                         <v-select v-model="form.status_pelanggan" label="Status Pelanggan" :items="status" required></v-select>
                         <v-text-field v-model="form.password_pelanggan" label="Password Pelanggan" :type="show ? 'text' : 'password'" 
                             :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'" @click:append="show = !show" required></v-text-field>

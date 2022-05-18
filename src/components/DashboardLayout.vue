@@ -15,31 +15,43 @@
       <v-divider></v-divider>
 
       <v-list dense nav v-if="loggedIn && !loggedInManager && !loggedInManager && !loggedInCS">
-        <v-list-item v-for="item in customers" :key="item.title" link tag="router-link" :to="item.to" >
+        <v-list-item v-for="item in customers" :key="item.title" link tag="router-link" :to="item.to">
+          <v-list-item-icon>
+            <v-icon>{{ item.icon }}</v-icon>
+          </v-list-item-icon>
           <v-list-item-content>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
+            <v-list-item-title class="text-left">{{ item.title }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
 
       <v-list dense nav v-if="loggedInManager">
-        <v-list-item v-for="item in managers" :key="item.title" link tag="router-link" :to="item.to" >
+        <v-list-item v-for="item in managers" :key="item.title" link tag="router-link" :to="item.to">
+          <v-list-item-icon>
+            <v-icon>{{ item.icon }}</v-icon>
+          </v-list-item-icon>
           <v-list-item-content>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
+            <v-list-item-title class="text-left">{{ item.title }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
 
       <v-list dense nav v-if="loggedInAdmin">
-        <v-list-item v-for="item in admins" :key="item.title" link tag="router-link" :to="item.to" >
+        <v-list-item v-for="item in admins" :key="item.title" link tag="router-link" :to="item.to">
+          <v-list-item-icon>
+            <v-icon>{{ item.icon }}</v-icon>
+          </v-list-item-icon>
           <v-list-item-content>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
+            <v-list-item-title class="text-left">{{ item.title }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
 
       <v-list dense nav v-if="loggedInCS">
-        <v-list-item v-for="item in cs" :key="item.title" link tag="router-link" :to="item.to" >
+        <v-list-item v-for="item in cs" :key="item.title" link tag="router-link" :to="item.to">
+          <v-list-item-icon>
+            <v-icon>{{ item.icon }}</v-icon>
+          </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item-content>
@@ -71,29 +83,34 @@
       return {
         drawer: true,
         customers: [
-          { title: "Profil", to: '/profil' },
-          // { title: 'Transaksi', to: '/transaksi' },
-          // { title: 'Detail Transaksi', to: '/detailTransaksi' },
+          { title: "Profil", to: '/profil', icon: 'mdi-account' },
+          { title: 'Daftar Promo', to: '/promoPelanggan', icon: 'mdi-sale' },
+          { title: 'Brosur Mobil', to: '/mobilPelanggan', icon: 'mdi-car' },
+          { title: 'Brosur Driver', to: '/driverPelanggan', icon: 'mdi-steering' },
+          { title: 'Transaksi', to: '/transaksiPelanggan', icon: 'mdi-folder' },
+          { title: 'Detail Transaksi', to: '/detailTransaksiPelanggan', icon: 'mdi-folder-multiple' },
         ],
         managers: [
-          { title: "Profil", to: '/profil' },
-          { title: "Jabatan", to: '/jabatan' },
-          { title: 'Promo', to: '/promo' },
-          { title: 'Jadwal', to: '/jadwal' },
-          { title: 'Detail Jadwal', to: '/detailJadwal' },
+          { title: "Profil", to: '/profil', icon: 'mdi-account' },
+          { title: "Jabatan", to: '/jabatan', icon: 'mdi-account-tie' },
+          { title: 'Promo', to: '/promo', icon: 'mdi-sale' },
+          { title: 'Jadwal', to: '/jadwal', icon: 'mdi-clock-outline' },
+          { title: 'Detail Jadwal', to: '/detailJadwal', icon: 'mdi-book-clock' },
         ],
         admins: [
-          { title: "Profil", to: '/profil' },
-          { title: 'Pemilik', to: '/pemilik' },
-          { title: 'Driver', to: '/driver' },
-          { title: 'Mobil', to: '/mobil' },
-          { title: 'Pegawai', to: '/pegawai' },
+          { title: "Profil", to: '/profil', icon: 'mdi-account' },
+          { title: 'Pemilik', to: '/pemilik', icon: 'mdi-account-supervisor' },
+          { title: 'Driver', to: '/driver', icon: 'mdi-steering' },
+          { title: 'Riwayat Driver', to: '/driverRiwayatTransaksi', icon: 'mdi-history' },
+          { title: 'Mobil', to: '/mobil', icon: 'mdi-car' },
+          { title: 'Kontrak Mobil', to: '/kontrakMobil', icon: 'mdi-car-info' },
+          { title: 'Pegawai', to: '/pegawai', icon: 'mdi-face-agent' },
         ],
         cs: [
-          { title: "Profil", to: '/profil' },
-          { title: 'Pelanggan', to: '/pelanggan' },
-          { title: 'Transaksi', to: '/transaksi' },
-          { title: 'Detail Transaksi', to: '/detailTransaksi' },
+          { title: "Profil", to: '/profil', icon: 'mdi-account' },
+          { title: 'Pelanggan', to: '/pelanggan', icon: 'mdi-account-group' },
+          { title: 'Transaksi', to: '/transaksi', icon: 'mdi-folder' },
+          { title: 'Detail Transaksi', to: '/detailTransaksi', icon: 'mdi-folder-multiple' },
         ]
       };
     },
