@@ -138,9 +138,9 @@
                 </v-container>
                 
                 <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn color="blue darken-1" text @click="dialogDokumen = false">Close</v-btn>
-                    </v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="dialogDokumen = false">Close</v-btn>
+                </v-card-actions>
             </v-card>
         </v-dialog>
 

@@ -28,9 +28,11 @@
                                                     <v-text-field type="date" v-model="form.tgl_lahir_pelanggan" label="Tanggal Lahir" prepend-icon="mdi-calendar-blank-outline" required></v-text-field>
                                                     <v-select v-model="form.jenis_kelamin_pelanggan" label="Jenis Kelamin" :items="jeniskelamin" prepend-icon="mdi-gender-male-female" required></v-select>
                                                     <v-text-field v-model="form.email_pelanggan" label="Email" prepend-icon="mdi-email" required></v-text-field>
-                                                    <v-text-field v-model="form.notelp_pelanggan" label="Nomor Telepon" prepend-icon="mdi-phone" required></v-text-field>
+                                                    <v-text-field v-model="form.notelp_pelanggan" label="Nomor Telepon" prepend-icon="mdi-phone" counter="13" required></v-text-field>
                                                     <v-text-field v-model="form.no_ktp_pelanggan" label="Nomor KTP" prepend-icon="mdi-card-account-details" counter="16" required></v-text-field>
                                                     <v-text-field v-model="form.no_sim_pelanggan" label="Nomor SIM" prepend-icon="mdi-card-account-details-outline" counter="13" required></v-text-field>
+                                                    <v-file-input append-icon="mdi-camera" accept="image/*" label="Foto KTP Pelanggan" id="ktpPelanggan" ref="fileKtpPelanggan"></v-file-input>
+                                                    <v-file-input append-icon="mdi-camera" accept="image/*" label="Foto SIM Pelanggan" id="simPelanggan" ref="fileSimPelanggan"></v-file-input>
                                                 </v-form>
                                             </v-card-text>
                                             <div class="text-center mt-6 mb-12">
@@ -95,7 +97,15 @@ export default {
             this.pelanggan.append('email_pelanggan', this.form.email_pelanggan);
             this.pelanggan.append('notelp_pelanggan', this.form.notelp_pelanggan);
             this.pelanggan.append('no_ktp_pelanggan', this.form.no_ktp_pelanggan);
-            this.pelanggan.append('no_sim_pelanggan', this.form.no_sim_pelanggan);
+            this.pelanggan.append('no_sim_pelanggan', this.form.no_sim_pelanggan ?? '');
+
+            var foto_ktp_pelanggan = document.getElementById('ktpPelanggan'), dataFotoKtpPelanggan = foto_ktp_pelanggan.files[0];
+            this.pelanggan.append('foto_ktp_pelanggan', dataFotoKtpPelanggan);
+
+            var foto_sim_pelanggan = document.getElementById('simPelanggan'),dataFotoSimPelanggan = foto_sim_pelanggan.files[0];
+            if(dataFotoSimPelanggan){
+                this.pelanggan.append('foto_sim_pelanggan', dataFotoSimPelanggan);
+            }
 
             var url = this.$api + '/pelanggan';
             this.load = true;
@@ -105,17 +115,17 @@ export default {
                 },
             })
             .then((response) => {
-            this.error_message = response.data.message;
-            this.color = "green";
-            this.snackbar = true;
-            this.load = true;
-            this.changePage();
+                this.error_message = response.data.message;
+                this.color = "green";
+                this.snackbar = true;
+                this.load = true;
+                this.changePage();
             })
             .catch((error) => {
-            this.error_message = error.response.data.message;
-            this.color = "red";
-            this.snackbar = true;
-            this.load = false;
+                this.error_message = error.response.data.message;
+                this.color = "red";
+                this.snackbar = true;
+                this.load = false;
             });
         },
 

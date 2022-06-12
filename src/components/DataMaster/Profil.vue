@@ -19,9 +19,25 @@
                     <v-select filled v-model="jenis_kelamin_pelanggan" :items="jeniskelamin" label="Jenis Kelamin" required></v-select>
                     <v-text-field v-model="no_ktp_pelanggan" required filled label="Nomor KTP"></v-text-field>
                     <v-text-field v-model="no_sim_pelanggan" filled label="Nomor SIM"></v-text-field>
+                    <v-file-input filled append-icon="mdi-camera" accept="image/*" label="Foto KTP Pelanggan" id="ktpPelanggan" ref="fileKtpPelanggan"></v-file-input>
+                    <v-file-input filled append-icon="mdi-camera" accept="image/*" label="Foto SIM Pelanggan" id="simPelanggan" ref="fileSimPelanggan"></v-file-input>
                     <v-text-field v-model="password_pelanggan" filled label="Password" :type="show ? 'text' : 'password'" 
                       :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'" @click:append="show = !show"></v-text-field>
-
+                    
+                    <v-container fluid>
+                      <v-layout justify-center>
+                        <v-flex shrink>
+                          <div class="row">
+                            <div class="mr-8">
+                              <v-img width="300px" :src="previewImageUrlKtp == '' ? $baseUrl+'/storage/'+ktp_pelanggans : previewImageUrlKtp" class="mb-5"></v-img>
+                            </div>
+                            <div>
+                              <v-img width="300px" :src="previewImageUrlSim == '' ? $baseUrl+'/storage/'+sim_pelanggans : previewImageUrlSim" class="mb-5"></v-img>
+                            </div>
+                          </div>
+                        </v-flex>
+                      </v-layout>
+                    </v-container>
                     <v-layout>
                       <v-layout justify-center>
                         <v-btn class="mr-2" @click="updatePelanggan" color="success"><strong>Edit Data</strong></v-btn>
@@ -98,6 +114,10 @@
               </div>
             </v-layout>
             
+            <v-card class="mt-8" v-if="loggedInPegawai">
+              <h2 class="mb-4">JADWAL PEGAWAI</h2>
+              <v-data-table :headers="headers" :items="jadwals" item-key="name" class="elevation-1" :search="search"></v-data-table>
+            </v-card>
 
           </v-col>
         </v-row>
@@ -131,6 +151,11 @@
     background-color: #245399;
     justify-content: center !important;
   }
+
+  table {
+    border: 1px solid;
+    border-collapse: collapse !important;
+  }
 </style>
 
 <script>
@@ -139,6 +164,13 @@ export default {
   name: "Profil",
   data(){
     return{
+      search: null,
+      jadwals: [],
+      headers: [
+        { text: 'Jadwal Pegawai', value: 'id_jadwal_pegawai' },
+        { text: 'Shift', value: 'shift_pegawai' },
+        { text: 'Hari', value: 'hari_pegawai' },
+      ],
       load: false,
       show: false,
       snackbar: false,
@@ -154,6 +186,8 @@ export default {
       jenis_kelamin_pelanggan: '',
       no_ktp_pelanggan: '',
       no_sim_pelanggan: '',
+      foto_ktp_pelanggan: '',
+      foto_sim_pelanggan: '',
       password_pelanggan: '',
       id_pegawai: '',
       id_jabatan: '',
@@ -165,12 +199,26 @@ export default {
       notelp_pegawai: '',
       password_pegawai: '',
       foto_pegawai: '',
-      previewImageUrl : ''
+      previewImageUrl : '',
+      previewImageUrlKtp : '',
+      previewImageUrlSim : '',
+      ktp_pelanggans: '',
+      sim_pelanggans: '',
     }
   },
   methods: {
     onPreviewImage(e) {
       this.previewImageUrl = URL.createObjectURL(e)
+      this.previewImageUrlKtp = URL.createObjectURL(e)
+      this.previewImageUrlSim = URL.createObjectURL(e)
+    },
+
+    readPelangganById(){
+      var url = this.$api + '/pelanggan/' + localStorage.getItem('id_pelanggan');
+      this.$http.get(url).then((response) => {
+          this.ktp_pelanggans = response.data.data.foto_ktp_pelanggan;
+          this.sim_pelanggans = response.data.data.foto_sim_pelanggan;
+      });
     },
 
     async generateCard(){
@@ -197,6 +245,20 @@ export default {
       data.append('no_sim_pelanggan', this.no_sim_pelanggan ?? '');
       data.append('status_pelanggan', localStorage.getItem('status_pelanggan'));
       data.append('password_pelanggan', this.password_pelanggan ?? '');
+
+      var inputKtpPelanggan = document.getElementById('ktpPelanggan'),
+      dataFotoKtpPelanggan = inputKtpPelanggan.files[0];
+
+      if(dataFotoKtpPelanggan){
+          data.append('foto_ktp_pelanggan', dataFotoKtpPelanggan);
+      }
+
+      var inputSimPelanggan = document.getElementById('simPelanggan'),
+      dataFotoSimPelanggan = inputSimPelanggan.files[0];
+
+      if(dataFotoSimPelanggan){
+          data.append('foto_sim_pelanggan', dataFotoSimPelanggan);
+      }
 
       var url = this.$api + '/pelanggan/' + localStorage.getItem('id_pelanggan');
       this.load = true;
@@ -263,6 +325,13 @@ export default {
       });
     },
 
+    readDataDetailJadwalPegawai(){
+      var url = this.$api + '/detailJadwalPegawai/' + localStorage.getItem('id_pegawai');
+      this.$http.get(url).then((response) => {
+          this.jadwals = response.data.data;
+      });
+    },
+
     readDataPelanggan(){
       this.id_pelanggan = localStorage.getItem('id_pelanggan');
       this.nama_pelanggan = localStorage.getItem('nama_pelanggan');
@@ -273,6 +342,8 @@ export default {
       this.jenis_kelamin_pelanggan = localStorage.getItem('jenis_kelamin_pelanggan');
       this.no_ktp_pelanggan = localStorage.getItem('no_ktp_pelanggan');
       this.no_sim_pelanggan = localStorage.getItem('no_sim_pelanggan');
+      this.foto_ktp_pelanggan = localStorage.getItem('foto_ktp_pelanggan');
+      this.foto_sim_pelanggan = localStorage.getItem('foto_sim_pelanggan');
       if(localStorage.getItem('no_sim_pelanggan') == 'null'){
         this.no_sim_pelanggan = '';
       } else{
@@ -290,6 +361,8 @@ export default {
       localStorage.setItem('jenis_kelamin_pelanggan', this.jenis_kelamin_pelanggan);
       localStorage.setItem('no_ktp_pelanggan', this.no_ktp_pelanggan);
       localStorage.setItem('no_sim_pelanggan', this.no_sim_pelanggan);
+      localStorage.setItem('foto_ktp_pelanggan', this.ktp_pelanggans);
+      localStorage.setItem('foto_sim_pelanggan', this.sim_pelanggans);
     },
 
     readDataPegawai(){
@@ -323,6 +396,7 @@ export default {
     },
 
     closePelanggan(){
+      this.readPelangganById();
       this.setPelangganActive();
       this.readDataPelanggan();
     },
@@ -344,8 +418,10 @@ export default {
     },
   },
   mounted(){
+    this.readPelangganById();
     this.readDataPelanggan();
     this.readDataPegawai();
+    this.readDataDetailJadwalPegawai();
   }
 }
 </script>

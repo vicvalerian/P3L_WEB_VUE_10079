@@ -12,6 +12,7 @@
                 <template v-slot:[`item.actions`]="{ item }">
                     <v-icon dense color="green" @click="editHandler(item)">mdi-pencil</v-icon>
                     <v-icon dense color="red" @click="deleteHandler(item.id_detail_transaksi)">mdi-delete</v-icon>
+                    <v-icon dense color="primary" dark @click="showImageHandler(item)">mdi-file</v-icon>
                 </template>
                 <template v-slot:[`item.status_transaksi`]="{ item }">
                     <v-chip v-if="item.status_transaksi === 'Belum Lunas Belum Verifikasi'" color="red" outlined>{{ item.status_transaksi }}</v-chip>
@@ -38,25 +39,26 @@
                         </v-select>
                         <v-select :items="mobils" v-model="form.id_mobil" label="Mobil" item-value="id_mobil" disabled required>
                             <template slot="selection" slot-scope="data">
-		                        {{ data.item.id_mobil }} - {{ data.item.plat_mobil }}
+		                        {{ data.item.id_mobil }} - {{ data.item.nama_mobil }} - Rp{{ data.item.sewa_harian_mobil }}/hari
 	                        </template>
                             <template slot="item" slot-scope="data">
-		                        {{ data.item.id_mobil }} - {{ data.item.plat_mobil }}
+		                        {{ data.item.id_mobil }} - {{ data.item.nama_mobil }} - Rp{{ data.item.sewa_harian_mobil }}/hari
 	                        </template>
                         </v-select>
-                        <v-select v-if="form.jenis_transaksi === 'Dengan Driver'" :items="drivers" v-model="form.id_driver" label="Driver" item-value="id_driver" clearable required>
+                        <v-select v-if="form.jenis_transaksi === 'Dengan Driver' && form.status_transaksi === 'Belum Lunas Belum Verifikasi'" :items="drivers" v-model="form.id_driver" label="Driver" item-value="id_driver" clearable required>
                             <template slot="selection" slot-scope="data">
-		                        {{ data.item.id_driver }} - {{ data.item.nama_driver }} - {{ data.item.sewa_harian_driver }}
+		                        {{ data.item.id_driver }} - {{ data.item.nama_driver }} - Rp{{ data.item.sewa_harian_driver }}/hari
 	                        </template>
                             <template slot="item" slot-scope="data">
-		                        {{ data.item.id_driver }} - {{ data.item.nama_driver }} - {{ data.item.sewa_harian_driver }}
+		                        {{ data.item.id_driver }} - {{ data.item.nama_driver }} - Rp{{ data.item.sewa_harian_driver }}/hari
 	                        </template>
                         </v-select>
+                        <v-text-field v-if="form.jenis_transaksi === 'Dengan Driver' && form.status_transaksi !== 'Belum Lunas Belum Verifikasi'" v-model="form.id_driver" label="Driver" disabled></v-text-field>
                         <v-text-field type="datetime-local" v-model="form.tgl_waktu_mulai_sewa" label="Tanggal Waktu Mulai Sewa" disabled required></v-text-field>
                         <v-text-field type="datetime-local" v-model="form.tgl_waktu_akhir_sewa" label="Tanggal Waktu Akhir Sewa" disabled required></v-text-field>
                         <v-text-field type="datetime-local" v-model="form.tgl_pengembalian" label="Tanggal Pengembalian" required></v-text-field>
                         <v-select :items="statusTransaksi" v-model="form.status_transaksi" label="Status Transaksi" required></v-select>
-                        <v-select :items="jenisTransaksi" v-model="form.jenis_transaksi" label="Jenis Transaksi" readonly></v-select>
+                        <v-select :items="jenisTransaksi" v-model="form.jenis_transaksi" label="Jenis Transaksi" disabled></v-select>
                     </v-container>
                 </v-card-text>
                 <v-card-actions>
@@ -81,6 +83,27 @@
             </v-card>
         </v-dialog>
 
+        <v-dialog v-model="dialogDokumen" persistent max-width="600px">
+            <v-card>
+                <v-card-title >
+                    <span class="headline">Bukti Pembayaran Pelanggan</span>
+                </v-card-title>
+                <v-divider></v-divider>
+                <v-container fluid>
+                    <v-layout justify-center align-center>
+                        <v-flex shrink>
+                            <div><v-img width="350px" :src="previewImageUrl == '' ? $baseUrl+'/storage/'+form.bukti_pembayaran : previewImageUrl" class="mb-5"></v-img></div>
+                        </v-flex>
+                    </v-layout>
+                </v-container>
+
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="dialogDokumen = false">Close</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
         <v-snackbar v-model="snackbar" :color="color" timeout="2000" bottom>{{ error_message }}</v-snackbar>
     </v-main>
 </template>
@@ -97,6 +120,7 @@ export default {
             search: null,
             dialog: false,
             dialogConfirm: false,
+            dialogDokumen: false,
             headers: [
                 { text: "Id Detail Transaksi", align: "start", sortable: true, value: "id_detail_transaksi", },
                 { text: "Id Transaksi", value: "id_transaksi" },
@@ -107,7 +131,6 @@ export default {
                 { text: "Tanggal Mulai Sewa", value: "tgl_waktu_mulai_sewa" },
                 { text: "Tanggal Akhir Sewa", value: "tgl_waktu_akhir_sewa" },
                 { text: "Tanggal Pengembalian", value: "tgl_pengembalian" },
-                { text: "Rating Driver", value: "rating_driver_transaksi" },
                 { text: "Diskon", value: "diskon_transaksi" },
                 { text: "Denda", value: "denda_transaksi" },
                 { text: "Jumlah", value: "jumlah_pembayaran" },
@@ -134,9 +157,14 @@ export default {
             editId: '',
             statusTransaksi: [ 'Belum Lunas Belum Verifikasi', 'Belum Lunas Sudah Verifikasi', 'Sudah Lunas Sudah Verifikasi' ],
             jenisTransaksi: [ 'Dengan Driver', 'Tanpa Driver' ],
+            previewImageUrl: '',
         };
     },
     methods: {
+        onPreviewImage(e) {
+            this.previewImageUrl = URL.createObjectURL(e);
+        },
+
         //Read Data Detail Transaksi
         readDataDetailTransaksi() {
             var url = this.$api + '/detailTransaksi';
@@ -250,6 +278,11 @@ export default {
         deleteHandler(id){
             this.deleteId = id;
             this.dialogConfirm = true;
+        },
+
+        showImageHandler(item){
+            this.form.bukti_pembayaran = item.bukti_pembayaran;
+            this.dialogDokumen = true;
         },
 
         close(){

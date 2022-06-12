@@ -127,6 +127,8 @@
           localStorage.removeItem('no_sim_pelanggan');
           localStorage.removeItem('password_pelanggan');
           localStorage.removeItem('status_pelanggan');
+          localStorage.removeItem('foto_ktp_pelanggan');
+          localStorage.removeItem('foto_sim_pelanggan');
           localStorage.removeItem('email');
           this.$router.push({
             name: 'Login',

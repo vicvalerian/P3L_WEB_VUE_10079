@@ -8,6 +8,11 @@
                 <v-btn color="success" dark @click="dialog = true"> Tambah </v-btn>
             </v-card-title>
             <v-data-table :headers="headers" :items="detailTransaksis" :search="search">
+                <template v-slot:[`item.status_transaksi`]="{ item }">
+                    <v-chip v-if="item.status_transaksi === 'Belum Lunas Belum Verifikasi'" color="red" outlined>{{ item.status_transaksi }}</v-chip>
+                    <v-chip v-if="item.status_transaksi === 'Belum Lunas Sudah Verifikasi'" color="orange" outlined>{{ item.status_transaksi }}</v-chip>
+                    <v-chip v-if="item.status_transaksi === 'Sudah Lunas Sudah Verifikasi'" color="green" outlined>{{ item.status_transaksi }}</v-chip>
+                </template>
                 <template v-slot:[`item.actions`]="{ item }">
                     <v-menu>
                         <template v-slot:activator="{ on, attrs }">
@@ -53,10 +58,10 @@
                         </v-select>
                         <v-select :items="mobils" v-model="form.id_mobil" label="Mobil" item-value="id_mobil" required>
                             <template slot="selection" slot-scope="data">
-		                        {{ data.item.id_mobil }} - {{ data.item.nama_mobil }} - {{ data.item.plat_mobil }}
+		                        {{ data.item.id_mobil }} - {{ data.item.nama_mobil }} - Rp{{ data.item.sewa_harian_mobil }}/hari
 	                        </template>
                             <template slot="item" slot-scope="data">
-		                        {{ data.item.id_mobil }} - {{ data.item.nama_mobil }} - {{ data.item.plat_mobil }}
+		                        {{ data.item.id_mobil }} - {{ data.item.nama_mobil }} - Rp{{ data.item.sewa_harian_mobil }}/hari
 	                        </template>
                         </v-select>
                         <!-- <v-select :items="drivers" v-model="form.id_driver" label="Driver" item-value="id_driver" clearable required>
@@ -71,7 +76,9 @@
                         <v-text-field type="datetime-local" v-model="form.tgl_waktu_akhir_sewa" label="Tanggal Waktu Akhir Sewa" required></v-text-field>
                         <v-select v-if="simPelanggan != 'null'" :items="jenisTransaksi" v-model="form.jenis_transaksi" label="Jenis Transaksi" required></v-select>
                         <v-select v-else :items="denganDriver" v-model="form.jenis_transaksi" label="Jenis Transaksi" required></v-select>
-                        <span v-if="simPelanggan == 'null'"><b>Transaksi Pelanggan Wajib Menggunakan Driver karena Pelanggan Tidak Memiliki SIM</b></span>
+                        <span v-if="simPelanggan == 'null'" class="red--text">
+                            <b>*Pelanggan Yang Tidak Memiliki SIM WAJIB Menggunakan Driver</b>
+                        </span>
                     </v-container>
                 </v-card-text>
                 <v-card-actions>
@@ -91,16 +98,19 @@
                     <v-container>
                         <v-select :items="mobils" v-model="form.id_mobil" label="Mobil" item-value="id_mobil" required>
                             <template slot="selection" slot-scope="data">
-		                        {{ data.item.id_mobil }} - {{ data.item.nama_mobil }} - {{ data.item.plat_mobil }}
+		                        {{ data.item.id_mobil }} - {{ data.item.nama_mobil }} - Rp{{ data.item.sewa_harian_mobil }}/hari
 	                        </template>
                             <template slot="item" slot-scope="data">
-		                        {{ data.item.id_mobil }} - {{ data.item.nama_mobil }} - {{ data.item.plat_mobil }}
+		                        {{ data.item.id_mobil }} - {{ data.item.nama_mobil }} - Rp{{ data.item.sewa_harian_mobil }}/hari
 	                        </template>
                         </v-select>
                         <v-text-field type="datetime-local" v-model="form.tgl_waktu_mulai_sewa" label="Tanggal Waktu Mulai Sewa" required></v-text-field>
                         <v-text-field type="datetime-local" v-model="form.tgl_waktu_akhir_sewa" label="Tanggal Waktu Akhir Sewa" required></v-text-field>
                         <v-select v-if="simPelanggan != 'null'" :items="jenisTransaksi" v-model="form.jenis_transaksi" label="Jenis Transaksi" required></v-select>
                         <v-select v-else :items="denganDriver" v-model="form.jenis_transaksi" label="Jenis Transaksi" required></v-select>
+                        <span v-if="simPelanggan == 'null'" class="red--text">
+                            <b>*Pelanggan Yang Tidak Memiliki SIM WAJIB Menggunakan Driver</b>
+                        </span>
                     </v-container>
                 </v-card-text>
                 <v-card-actions>
@@ -203,6 +213,7 @@ export default {
                 { text: "Tanggal Akhir Sewa", value: "tgl_waktu_akhir_sewa" },
                 { text: "Tanggal Pengembalian", value: "tgl_pengembalian" },
                 { text: "Rating Driver", value: "rating_driver_transaksi" },
+                { text: "Status", value: "status_transaksi" },
                 { text: "Action", value: "actions" },
             ],
             detailTransaksi: new FormData(),

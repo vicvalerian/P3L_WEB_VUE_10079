@@ -14,6 +14,7 @@
                 <template v-slot:[`item.actions`]="{ item }">
                     <v-icon dense color="green" @click="editHandler(item)">mdi-pencil</v-icon>
                     <v-icon dense color="red" @click="deleteHandler(item.id_pelanggan)">mdi-delete</v-icon>
+                    <v-icon dense color="primary" dark @click="showImageHandler(item)">mdi-file-multiple</v-icon>
                 </template>
                 <template v-slot:[`item.status_pelanggan`]="{ item }">
                     <v-chip v-if="item.status_pelanggan === 'Belum Verifikasi'" color="red" outlined>{{ item.status_pelanggan }}</v-chip>
@@ -37,6 +38,8 @@
                         <v-text-field v-model="form.notelp_pelanggan" label="Nomor Telepon Pelanggan" required></v-text-field>
                         <v-text-field v-model="form.no_ktp_pelanggan" label="No KTP Pelanggan" counter="16" required></v-text-field>
                         <v-text-field v-model="form.no_sim_pelanggan" label="No SIM Pelanggan" counter="13"></v-text-field>
+                        <v-file-input append-icon="mdi-camera" accept="image/*" label="Foto KTP Pelanggan" id="ktpPelanggan" ref="fileKtpPelanggan"></v-file-input>
+                        <v-file-input append-icon="mdi-camera" accept="image/*" label="Foto SIM Pelanggan" id="simPelanggan" ref="fileSimPelanggan"></v-file-input>
                     </v-container>
                     <v-container v-else>
                         <v-text-field v-model="form.nama_pelanggan" label="Nama Pelanggan" required></v-text-field>
@@ -47,6 +50,8 @@
                         <v-text-field v-model="form.notelp_pelanggan" label="Nomor Telepon Pelanggan" required></v-text-field>
                         <v-text-field v-model="form.no_ktp_pelanggan" label="No KTP Pelanggan" counter="16" required></v-text-field>
                         <v-text-field v-model="form.no_sim_pelanggan" label="No SIM Pelanggan" counter="13"></v-text-field>
+                        <v-file-input append-icon="mdi-camera" accept="image/*" label="Foto KTP Pelanggan" id="ktpPelanggan" ref="fileKtpPelanggan"></v-file-input>
+                        <v-file-input append-icon="mdi-camera" accept="image/*" label="Foto SIM Pelanggan" id="simPelanggan" ref="fileSimPelanggan"></v-file-input>
                         <v-select v-model="form.status_pelanggan" label="Status Pelanggan" :items="status" required></v-select>
                         <v-text-field v-model="form.password_pelanggan" label="Password Pelanggan" :type="show ? 'text' : 'password'" 
                             :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'" @click:append="show = !show" required></v-text-field>
@@ -74,6 +79,38 @@
             </v-card>
         </v-dialog>
 
+        <v-dialog v-model="dialogDokumen" persistent max-width="600px">
+            <v-card>
+                <v-card-title >
+                    <span class="headline">Dokumen Pelanggan</span>
+                </v-card-title>
+                <span><b>Kartu Tanda Penduduk</b></span>
+                <v-divider></v-divider>
+                <v-container fluid>
+                    <v-layout justify-center align-center>
+                        <v-flex shrink>
+                            <div><v-img width="350px" :src="previewImageUrlKtp == '' ? $baseUrl+'/storage/'+form.foto_ktp_pelanggan : previewImageUrlKtp" class="mb-5"></v-img></div>
+                        </v-flex>
+                    </v-layout>
+                </v-container>
+                
+                <span><b>Surat Izin Mengemudi</b></span>
+                <v-divider></v-divider>
+                <v-container fluid>
+                    <v-layout justify-center align-center>
+                        <v-flex shrink>
+                            <div><v-img width="350px" :src="previewImageUrlSim == '' ? $baseUrl+'/storage/'+form.foto_sim_pelanggan : previewImageUrlSim" class="mb-5"></v-img></div>
+                        </v-flex>
+                    </v-layout>
+                </v-container>
+                
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="dialogDokumen = false">Close</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
         <v-snackbar v-model="snackbar" :color="color" timeout="2000" bottom>{{ error_message }}</v-snackbar>
     </v-main>
 </template>
@@ -92,6 +129,7 @@ export default {
             search: null,
             dialog: false,
             dialogConfirm: false,
+            dialogDokumen: false,
             headers: [
                 { text: "Id Pelanggan", align: "start", sortable: true, value: "id_pelanggan", },
                 { text: "Nama", value: "nama_pelanggan" },
@@ -123,9 +161,16 @@ export default {
             editId: '',
             jeniskelamin: [ 'Laki-Laki', 'Perempuan' ],
             status: [ 'Belum Verifikasi', 'Sudah Verifikasi' ],
+            previewImageUrlKtp : '',
+            previewImageUrlSim : '',
         };
     },
     methods: {
+        onPreviewImage(e) {
+            this.previewImageUrlKtp = URL.createObjectURL(e);
+            this.previewImageUrlSim = URL.createObjectURL(e);
+        },
+
         setForm(){
             if (this.inputType !== 'Tambah') {
                 this.update();
@@ -151,7 +196,15 @@ export default {
             this.pelanggan.append('email_pelanggan', this.form.email_pelanggan);
             this.pelanggan.append('notelp_pelanggan', this.form.notelp_pelanggan);
             this.pelanggan.append('no_ktp_pelanggan', this.form.no_ktp_pelanggan);
-            this.pelanggan.append('no_sim_pelanggan', this.form.no_sim_pelanggan);
+            this.pelanggan.append('no_sim_pelanggan', this.form.no_sim_pelanggan ?? '');
+
+            var foto_ktp_pelanggan = document.getElementById('ktpPelanggan'), dataFotoKtpPelanggan = foto_ktp_pelanggan.files[0];
+            this.pelanggan.append('foto_ktp_pelanggan', dataFotoKtpPelanggan);
+
+            var foto_sim_pelanggan = document.getElementById('simPelanggan'),dataFotoSimPelanggan = foto_sim_pelanggan.files[0];
+            if(dataFotoSimPelanggan){
+                this.pelanggan.append('foto_sim_pelanggan', dataFotoSimPelanggan);
+            }
 
             var url = this.$api + '/pelanggan';
             this.load = true;
@@ -190,6 +243,20 @@ export default {
             data.append('no_sim_pelanggan', this.form.no_sim_pelanggan ?? '');
             data.append('status_pelanggan', this.form.status_pelanggan);
             data.append('password_pelanggan', this.form.password_pelanggan ?? '');
+
+            var inputKtpPelanggan = document.getElementById('ktpPelanggan'),
+            dataFotoKtpPelanggan = inputKtpPelanggan.files[0];
+
+            if(dataFotoKtpPelanggan){
+                data.append('foto_ktp_pelanggan', dataFotoKtpPelanggan);
+            }
+
+            var inputSimPelanggan = document.getElementById('simPelanggan'),
+            dataFotoSimPelanggan = inputSimPelanggan.files[0];
+
+            if(dataFotoSimPelanggan){
+                data.append('foto_sim_pelanggan', dataFotoSimPelanggan);
+            }
 
             var url = this.$api + '/pelanggan/' + this.editId;
             this.load = true;
@@ -256,7 +323,13 @@ export default {
             this.form.no_sim_pelanggan = item.no_sim_pelanggan;
             this.form.status_pelanggan = item.status_pelanggan;
             this.dialog = true;
-            },
+        },
+
+        showImageHandler(item){
+            this.form.foto_ktp_pelanggan = item.foto_ktp_pelanggan;
+            this.form.foto_sim_pelanggan = item.foto_sim_pelanggan;
+            this.dialogDokumen = true;
+        },
 
         deleteHandler(id){
             this.deleteId = id;
@@ -291,6 +364,8 @@ export default {
                 status_pelanggan: '',
                 password_pelanggan: '',
             };
+            this.$refs.fileKtpPelanggan.reset();
+            this.$refs.fileSimPelanggan.reset();
         },
     },
     computed:{

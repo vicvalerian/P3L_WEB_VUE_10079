@@ -71,7 +71,7 @@ export default {
             email: '',
             password: '',
             akun: '',
-            pilihanAkun: [ 'Pelanggan', 'Pegawai', 'Driver' ],
+            pilihanAkun: [ 'Pelanggan', 'Pegawai' ],
         };
     },
     methods:{
@@ -98,6 +98,8 @@ export default {
                         localStorage.setItem('no_sim_pelanggan', response.data.data.no_sim_pelanggan);
                         localStorage.setItem('status_pelanggan', response.data.data.status_pelanggan);
                         localStorage.setItem('password_pelanggan', response.data.data.password_pelanggan);
+                        localStorage.setItem('foto_ktp_pelanggan', response.data.data.foto_ktp_pelanggan);
+                        localStorage.setItem('foto_sim_pelanggan', response.data.data.foto_sim_pelanggan);
                     } else if(this.akun === 'Pegawai' ){
                         localStorage.setItem('id_pegawai', response.data.data.id_pegawai);
                         localStorage.setItem('id_jabatan', response.data.data.id_jabatan);
