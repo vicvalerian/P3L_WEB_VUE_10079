@@ -13,6 +13,7 @@
                     <v-icon dense color="green" @click="editHandler(item)">mdi-pencil</v-icon>
                     <v-icon dense color="red" @click="deleteHandler(item.id_detail_transaksi)">mdi-delete</v-icon>
                     <v-icon dense color="primary" dark @click="showImageHandler(item)">mdi-file</v-icon>
+                    <v-icon dense color="brown" dark @click="printNota(item)">mdi-download</v-icon>
                 </template>
                 <template v-slot:[`item.status_transaksi`]="{ item }">
                     <v-chip v-if="item.status_transaksi === 'Belum Lunas Belum Verifikasi'" color="red" outlined>{{ item.status_transaksi }}</v-chip>
@@ -259,6 +260,20 @@ export default {
                 this.snackbar = true;
                 this.load = false;
             });
+        },
+
+        printNota(item){
+            this.idNota = item.id_detail_transaksi;
+            this.$http.get(this.$api + '/generate-pdf/' + this.idNota, {
+                responseType: 'arraybuffer'
+            })
+            .then(response => {
+                let blob = new Blob([response.data], { type: 'application/pdf' })
+                let link = document.createElement('a')
+                link.href = window.URL.createObjectURL(blob)
+                link.download = 'Nota Pembayaran.pdf'
+                link.click()
+            })
         },
 
         editHandler(item){

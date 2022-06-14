@@ -24,10 +24,10 @@
                         <v-text-field v-model="form.id_pelanggan" label="Id Pelanggan" disabled required></v-text-field>
                         <v-select :items="promos" v-model="form.id_promo" label="Promo" item-value="id_promo" clearable required>
                             <template slot="selection" slot-scope="data">
-		                        {{ data.item.id_promo }} - {{ data.item.kode_promo }}
+		                        {{ data.item.id_promo }} - {{ data.item.kode_promo }} - {{ data.item.diskon_promo }}%
 	                        </template>
                             <template slot="item" slot-scope="data">
-		                        {{ data.item.id_promo }} - {{ data.item.kode_promo }}
+		                        {{ data.item.id_promo }} - {{ data.item.kode_promo }} - {{ data.item.diskon_promo }}%
 	                        </template>
                         </v-select>
                         <v-text-field type="date" v-model="form.tgl_transaksi" label="Tanggal Transaksi" required></v-text-field>
